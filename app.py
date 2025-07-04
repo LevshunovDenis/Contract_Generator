@@ -114,7 +114,9 @@ def index():
 @app.route('/generate_word', methods=['POST'])
 def generate_word():
     # Получаем данные из формы
+    finance_type = request.form.get('finance_type')  
     nomer_dogovora = request.form.get('nomer_dogovora')
+    centr_podpis = request.form.get('centr_podpis')
     postavchik_unp = request.form.get('postavchik')
     v_interesah = request.form.get('v_interesah')
     summа_dogovora = float(request.form.get('summa_dogovora'))  # Преобразуем сумму в float
@@ -123,6 +125,7 @@ def generate_word():
     summa_propis = number_to_words(summа_dogovora)  
     summa_budget = number_to_words(summa_budget)
     summa_offbudget = number_to_words(summa_offbudget)# Получаем сумму прописью
+    metod_oplata = request.form.get('metod_oplata')
     first_date = convert_date_format(request.form.get('first_date'))
     last_date = convert_date_format(request.form.get('last_date'))
     metod_post = request.form.get('metod_post')
@@ -133,6 +136,19 @@ def generate_word():
     phone = request.form.get('phone')
     bank = request.form.get('bank')
     podpis = request.form.get('podpis')
+    
+    centr_podpisant = ''
+    centr_podpisant_fio = ''
+    if centr_podpis == "sindeev":
+        centr_podpisant = "управляющего Синдеева Евгения Дмитриевича, действующего на основании Устава "
+        centr_podpisant_fio = "Е.Д. Синдеев"
+    elif centr_podpis == "lisimenko":
+        centr_podpisant = "заместителя управляющего Лисименко Владислава Евгеньевича, действующего на основании доверенности № 28 от 03.01.2025 года "
+        centr_podpisant_fio = "В.Е. Лисименко"
+    else:
+        centr_podpisant = "Тип финансирования не определён."
+    
+
 
     # Словарь связи УНК и заказчика
     UNK_dict = {
@@ -232,9 +248,104 @@ def generate_word():
     # Получаем реквизиты от выбранного заказчика
     rekviz_value = rekviz_dict.get(v_interesah, "Неизвестно")
     
+    if finance_type == 'budget':
+        summa_propis = f"Общая сумма Договора составляет {summa_propis} белорусских рублей."
+    elif finance_type == 'offbudget':
+        summa_propis = f"Общая сумма Договора составляет {summa_propis} белорусских рублей."
+    elif finance_type == 'both':
+        summa_propis = f"Общая сумма Договора составляет {summa_propis}  белорусских рублей из них: {summa_budget} белорусских рублей- средства районного бюджета УНК {UNK}; {summa_offbudget} белорусских рублей- внебюджетные средства."
+    else:
+        summa_propis = "Тип финансирования не определён."
 
+    if finance_type == 'budget' and v_interesah == "Отдел образования Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - районный бюджет, УНК - 20100"
+    elif finance_type == 'offbudget' and v_interesah == "Отдел образования Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Отдел образования Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства, районный бюджет"
+    elif finance_type == 'budget' and v_interesah == "Сектор спорта и туризма Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - районный бюджет, УНК - 1020"
+    elif finance_type == 'offbudget' and v_interesah == "Сектор спорта и туризма Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Сектор спорта и туризма Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства, районный бюджет"
+    elif finance_type == 'budget' and v_interesah == "Отдел культуры Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - районный бюджет, УНК - 20060"
+    elif finance_type == 'offbudget' and v_interesah == "Отдел культуры Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Отдел культуры Кормянского районного исполнительного комитета":
+        istochnik = f"Источник финансирования - внебюджетные средства, районный бюджет"
+    elif finance_type == 'budget' and v_interesah == "Государственное учреждение 'Кормянский районный архив'":
+        istochnik = f"Источник финансирования - районный бюджет, УНК - 1008"
+    elif finance_type == 'offbudget' and v_interesah == "Государственное учреждение 'Кормянский районный архив'":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Государственное учреждение 'Кормянский районный архив'":
+        istochnik = f"Источник финансирования - внебюджетные средства, районный бюджет"
+    elif finance_type == 'budget' and v_interesah == "Учреждение 'Кормянский территориальный центр социального обслуживания населения'":
+        istochnik = f"Источник финансирования - районный бюджет, УНК - 2018"
+    elif finance_type == 'offbudget' and v_interesah == "Учреждение 'Кормянский территориальный центр социального обслуживания населения'":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Учреждение 'Кормянский территориальный центр социального обслуживания населения'":
+        istochnik = f"Источник финансирования - внебюджетные средства, районный бюджет"
+    elif finance_type == 'budget' and v_interesah == "Барсуковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20311"
+    elif finance_type == 'offbudget' and v_interesah == "Барсуковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Барсуковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Боровобудский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20391"
+    elif finance_type == 'offbudget' and v_interesah == "Боровобудский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Боровобудский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Ворновский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20321"
+    elif finance_type == 'offbudget' and v_interesah == "Ворновский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Ворновский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Коротьковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20341"
+    elif finance_type == 'offbudget' and v_interesah == "Коротьковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Коротьковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Литвиновичский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20351"
+    elif finance_type == 'offbudget' and v_interesah == "Литвиновичский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Литвиновичский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Лужковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20361"
+    elif finance_type == 'offbudget' and v_interesah == "Лужковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Лужковский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    elif finance_type == 'budget' and v_interesah == "Староградский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - бюджет сельского совета, УНК - 20381"
+    elif finance_type == 'offbudget' and v_interesah == "Староградский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства"
+    elif finance_type == 'both' and v_interesah == "Староградский сельский исполнительный комитет":
+        istochnik = f"Источник финансирования - внебюджетные средства, бюджет сельского совета"
+    else:
+        summa_propis = "Тип финансирования не определён."
+    
 
-    # Получаем полное наименование поставщика через УНП
+    full_postavka = ''
+    if metod_oplata == '100% предоплата':
+        metod_oplata = f"Предоплата в размере 100% осуществляется Покупателем  со счетов органов Государственного казначейства на расчетный счет Поставщика. Обязательство по оплате считается исполненным с момента передачи платежного поручения в органы государственного казначейства"
+        full_postavka = f'Поставка Товара производится в  течение 5 рабочих дней с момента поступления денежных средств на расчетный счет Поставщика. Поставщик письменно уведомляет Покупателя о готовности Товара к отгрузке.'
+    elif metod_oplata == 'Оплата по факту':
+        metod_oplata = f"Расчеты осуществляются в безналичной форме платежными поручениями. Оплата производится со счета органов государственного казначейства на расчетный счет Поставщика по факту поставки Товара на основании ТН (ТТН) в течение 10-ти банковских дней. Обязательство по оплате считается исполненным с момента передачи платежного поручения в органы государственного казначейства."   
+        full_postavka = f'Поставка Товара производится с {first_date} по {last_date}.  Поставщик письменно уведомляет Покупателя о готовности Товара к отгрузке.'
+    else:
+        metod_oplata = "" 
+        full_postavka = ""
+
+        
+       # Получаем полное наименование поставщика через УНП
     company_info = get_company_info(postavchik_unp)
 
 
@@ -245,7 +356,10 @@ def generate_word():
 
 
     # Путь к шаблону Word документа
-    template_path = os.path.join('templates', 'template.docx')
+    if finance_type == 'offbudget':
+        template_path = os.path.join('templates', 'template_offbudget.docx')
+    else:
+        template_path = os.path.join('templates', 'template.docx')
 
 
 
@@ -260,8 +374,13 @@ def generate_word():
         'date': today_date,  # Заменяем дату на сегодняшнюю
         'postavchik': company_info['vnaimp'],  # Подставляем полное наименование из API
         'v_interesah': v_interesah,
+        'centr_podpisant': centr_podpisant,
         'summа_dogovora': summа_dogovora,
         'summa_propis': summa_propis,
+        'istochnik': istochnik,
+        'metod_oplata': metod_oplata,
+        'full_postavka': full_postavka,
+
         'first_date': first_date,
         'last_date': last_date,
         'metod_post': metod_post,
@@ -273,6 +392,7 @@ def generate_word():
         'phone': phone,
         'rekviz': rekviz_value,
         'podpis': podpis,
+        'centr_podpisant_fio': centr_podpisant_fio,
         'UNK': UNK,
         'dog_obs': dog_obs,
         'podpis_fio': podpis_fio,
