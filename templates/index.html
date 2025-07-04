@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Генерация Word документа</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      gap: 30px;
+    }
+
+    form, .preview {
+      flex: 1;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .half-width {
+      flex: 1;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .preview h3 {
+      margin-top: 0;
+      text-align: center;
+      color: #333;
+      font-size: 22px;
+    }
+
+    .preview-content {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+
+    .preview-content b {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <form id="contractForm" action="/generate_word" method="POST">
+
+    <div class="form-group">
+      <label for="finance_type">Тип финансирования:</label>
+      <select id="finance_type" name="finance_type" required>
+        <option value="budget">Бюджет</option>
+        <option value="offbudget">Внебюджет</option>
+        <option value="both">Бюджет + Внебюджет</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group half-width">
+        <label for="nomer_dogovora">Номер договора:</label>
+        <input type="text" id="nomer_dogovora" name="nomer_dogovora" required>
+      </div>
+
+      <div class="form-group half-width">
+        <label for="postavchik">УНП Поставщика:</label>
+        <input type="text" id="postavchik" name="postavchik" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="v_interesah">Договор в интересах:</label>
+      <select id="v_interesah" name="v_interesah" required>
+        <option value="Отдел образования Кормянского районного исполнительного комитета">Отдел образования</option>
+        <option value="Сектор спорта и туризма Кормянского районного исполнительного комитета">Сектор спорта</option>
+        <option value="Отдел культуры Кормянского районного исполнительного комитета">Отдел культуры</option>
+        <!-- остальные опции... -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="summa_dogovora">Сумма по договору:</label>
+      <input type="number" id="summa_dogovora" name="summa_dogovora" step="0.01" required>
+    </div>
+
+    <!-- Эти поля будут отображаться ТОЛЬКО при выборе "Бюджет + Внебюджет" -->
+    <div id="budgetFields" style="display: none;">
+      <div class="form-group">
+        <label for="summa_budget">Сумма по бюджету:</label>
+        <input type="number" id="summa_budget" name="summa_budget" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="summa_offbudget">Сумма по внебюджету:</label>
+        <input type="number" id="summa_offbudget" name="summa_offbudget" step="0.01">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="first_date">Дата поставки с:</label>
+      <input type="date" id="first_date" name="first_date" required>
+    </div>
+
+    <div class="form-group">
+      <label for="last_date">Дата поставки по:</label>
+      <input type="date" id="last_date" name="last_date" required>
+    </div>
+
+    <div class="form-group">
+      <label for="metod_post">Поставка/самовывоз:</label>
+      <select id="metod_post" name="metod_post" required>
+        <option value="Поставшика">Поставка</option>
+        <option value="Покупателя (самовывоз)">Самовывоз</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="adress_post">Адрес поставки:</label>
+      <input type="text" id="adress_post" name="adress_post" required>
+    </div>
+
+    <div class="form-group">
+      <label for="bank">Реквизиты банка поставщика:</label>
+      <input type="text" id="bank" name="bank" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email_post">Email поставщика:</label>
+      <input type="email" id="email_post" name="email_post" required>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Телефон поставщика:</label>
+      <input type="text" id="phone" name="phone" required>
+    </div>
+  </form>
+
+  <div class="preview">
+    <h3>Предварительный просмотр</h3>
+    <div class="preview-content" id="previewContent">
+      Заполните поля слева для предварительного просмотра.
+    </div>
+    <button type="submit" form="contractForm">Сформировать Word документ</button>
+  </div>
+
+</div>
+
+<script>
+  const formElements = document.querySelectorAll('#contractForm input, #contractForm select');
+  const preview = document.getElementById('previewContent');
+  const financeType = document.getElementById('finance_type');
+  const budgetFields = document.getElementById('budgetFields');
+
+  function toggleBudgetFields() {
+    budgetFields.style.display = financeType.value === 'both' ? 'block' : 'none';
+  }
+
+  formElements.forEach(el => el.addEventListener('input', updatePreview));
+  financeType.addEventListener('change', () => {
+    toggleBudgetFields();
+    updatePreview();
+  });
+
+  function updatePreview() {
+    let previewText = `
+<b>Тип финансирования:</b> ${financeType.value}
+<b>Номер договора:</b> ${document.getElementById('nomer_dogovora').value}
+<b>УНП Поставщика:</b> ${document.getElementById('postavchik').value}
+<b>В интересах:</b> ${document.getElementById('v_interesah').value}
+<b>Сумма договора:</b> ${document.getElementById('summa_dogovora').value}
+`;
+
+    if (financeType.value === 'both') {
+      previewText += `
+<b>Сумма по бюджету:</b> ${document.getElementById('summa_budget').value}
+<b>Сумма по внебюджету:</b> ${document.getElementById('summa_offbudget').value}
+`;
+    }
+
+    previewText += `
+<b>Дата с:</b> ${document.getElementById('first_date').value}
+<b>Дата по:</b> ${document.getElementById('last_date').value}
+<b>Реквизиты банка:</b> ${document.getElementById('bank').value}
+<b>Email:</b> ${document.getElementById('email_post').value}
+<b>Телефон:</b> ${document.getElementById('phone').value}
+`;
+
+    preview.innerHTML = previewText;
+  }
+
+  // Запуск при загрузке
+  toggleBudgetFields();
+  updatePreview();
+</script>
+
+</body>
+</html>
